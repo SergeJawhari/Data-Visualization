@@ -7,7 +7,7 @@
 import nltk
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
-url = "https://www.nytimes.com/2020/09/27/business/media/trump-election-fox-news.html"
+url = "https://www.nytimes.com/2017/04/26/magazine/baking-is-all-in-the-hands.html"
 html = urlopen(url).read()
 
 
@@ -67,7 +67,6 @@ plt.show()
 
 
 # In[ ]:
-
 
 
 
