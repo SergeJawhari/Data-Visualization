@@ -3,28 +3,40 @@
 
 # In[1]:
 
-
 import nltk
-from urllib.request import urlopen
-from bs4 import BeautifulSoup
-url = "https://www.nytimes.com/2017/04/26/magazine/baking-is-all-in-the-hands.html"
-html = urlopen(url).read()
+import sys
+import os
+#taking the input from a text file at the given file path
+#example of a path in windows: C:/Users/abc/Desktop/testingdoc.txt
+file_path = input("Please provide the path of the text file: ")
+print(file_path)
+assert os.path.exists(file_path), "File not found at , "+str(file_path)
+f = open(file_path,'r+')
+text = f.read()
+f.close()
+
+#code when input is taken from html
+# from urllib.request import urlopen
+# from bs4 import BeautifulSoup
+# url = "https://www.nytimes.com/2017/04/26/magazine/baking-is-all-in-the-hands.html"
+# html = urlopen(url).read()
 
 
 # In[2]:
 
-
-soup = BeautifulSoup(html)
+#code when input is taken from html
+# soup = BeautifulSoup(html)
 # kill all script and style elements
-for script in soup(["script", "style"]):
-    script.extract()    # rip it out
+# for script in soup(["script", "style"]):
+#     script.extract()    # rip it out
 
 
 # In[3]:
 
 
-text = soup.get_text()
+# text = soup.get_text()
 # break into lines and remove leading and trailing space on each
+
 lines = (line.strip() for line in text.splitlines())
 # break multi-headlines into a line each
 chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
@@ -52,7 +64,6 @@ filtered_words = [word for word in wordsFiltered if word not in stopwords.words(
 
 
 # In[5]:
-
 
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
