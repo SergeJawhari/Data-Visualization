@@ -37,7 +37,7 @@ text = 'n'.join(chunk for chunk in chunks if chunk)
 
 #download and print the stop words for the English language
 from nltk.corpus import stopwords
-#nltk.download('stopwords')
+nltk.download('stopwords')
 stop_words = set(stopwords.words('english'))
 
 #tokenise the data set
@@ -57,7 +57,7 @@ filtered_words = [word for word in wordsFiltered if word not in stopwords.words(
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 wc = WordCloud(max_words=1000, margin=10, background_color='white',
-scale=3, relative_scaling = 0.5, width=500, height=400,
+scale=3, relative_scaling = 0.5, width=500, height=400,min_font_size=6,
 random_state=1).generate(' '.join(filtered_words))
 plt.figure(figsize=(20,10))
 plt.imshow(wc)
@@ -66,7 +66,9 @@ plt.show()
 #wc.to_file("/wordcloud.png")
 
 
-# In[ ]:
+
+
+
 
 
 
