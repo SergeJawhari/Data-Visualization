@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
-
+#references:
+# https://github.com/kavgan/word_cloud/blob/master/word_cloud/word_cloud_generator.py
+# https://stackoverflow.com/questions/16729574/how-to-get-a-value-from-a-cell-of-a-dataframe
+# https://investigate.ai/text-analysis/counting-words-with-scikit-learns-countvectorizer/
 # In[72]:
 
 import pandas as pd
@@ -114,7 +117,7 @@ class WordCloud:
         word_cloud_items = []
 
         html = [
-            "<html><head><style>.tooltip {position: relative;display:inline-block;}.tooltip .tooltiptext {visibility: hidden;width: 120px;background-color: black;color: #fff;text-align: center;border-radius: 6px;padding: 5px 0;position: absolute;z-index: 1;top: -5px;left: 110%;font-size: 12px;}.tooltip .tooltiptext::after {content: "";position: absolute;top: 50%;right: 100%;margin-top: -5px;border-width: 5px;border-style: solid;border-color: transparent black transparent transparent;font-size: 12px;}.tooltip:hover .tooltiptext {visibility: visible;font-size: 12px;}</style></head><body><div align='center' style='width:100%'><div align='center' style='text-align:justify; border-radius: 25px;background: #fff7f7;overflow: auto; width:500px !important; padding:20px; '; text-align: center; word-wrap: break-word;> "]
+            "<html><head><style>.tooltip{position: relative;display:inline-block;}.tooltip .tooltiptext {visibility: hidden;width: 120px;background-color: black;color: #fff;text-align: center;border-radius: 6px;padding: 5px 0;position: absolute;z-index: 1;top: -5px;left: 110%;font-size: 12px;}.tooltip .tooltiptext::after {content: '';position: absolute;top: 50%;right: 100%;margin-top: -5px;border-width: 5px;border-style: solid;border-color: transparent black transparent transparent;font-size: 12px;}.tooltip:hover .tooltiptext {visibility: visible;font-size: 12px;}</style></head><body><div align='center' style='width:100%'><div align='center' style='text-align:justify; border-radius: 25px;background: #fff7f7;overflow: auto; width:500px !important; padding:20px; '; text-align: center; word-wrap: break-word;> "]
         
         wc = CountVectorizer(text,stop_words=self.stopwords)
         wc_vector = wc.fit_transform(text)
@@ -223,8 +226,7 @@ ENGLISH_STOP_WORDS = set(stopwords.words('english'))
 #taking the input from a text file at the given file path
 #example of a path in windows: C:/Users/rishi/OneDrive/Desktop/testingdoc.txt
 
-# file_path = input("Please provide the path of the text file: ")
-file_path = "C:/Users/rishi/OneDrive/Desktop/testingdoc.txt"
+file_path = input("Please provide the path of the text file: ")
 assert os.path.exists(file_path), "File not found at , "+str(file_path)
 with open(file_path, 'r', encoding='utf-8') as file:
     text = file.read().replace('\n', '')
@@ -246,7 +248,7 @@ url = "file:///" + os.path.realpath('wordcloudoutput.html')
 webbrowser.open(url,new=new)
 
 
-# In[ ]:
+
 
 
 
