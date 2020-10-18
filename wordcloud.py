@@ -1,9 +1,14 @@
 #!/usr/bin/env python
 # coding: utf-8
-#references:
+# references:
 # https://github.com/kavgan/word_cloud/blob/master/word_cloud/word_cloud_generator.py
 # https://stackoverflow.com/questions/16729574/how-to-get-a-value-from-a-cell-of-a-dataframe
 # https://investigate.ai/text-analysis/counting-words-with-scikit-learns-countvectorizer/
+
+# Members: Sirage El-Jawhari
+#          Rishitha Pericherla
+#          Sakthi Karthigai Selvi Sekar     
+
 # In[72]:
 
 import pandas as pd
