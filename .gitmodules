@@ -1,0 +1,6 @@
+[submodule "Project-1"]
+	path = Project-1
+	url = https://github.com/SergeJawhari/Data-Visualization
+[submodule "Project-2"]
+	path = Project-2
+	url = https://github.com/SergeJawhari/Data-Visualization
