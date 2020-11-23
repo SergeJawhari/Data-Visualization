@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<!--
+resources : 
+https://github.com/observablehq/stdlib/blob/master/src/fileAttachment.js
+https://github.com/ackuser/d3js-bubble-chart/blob/master/index.js
+https://www.d3-graph-gallery.com/graph/bubble_template.html
+-->
+<html>
+<head>
+<script src="https://d3js.org/d3.v6.min.js"></script>
+<script src="https://d3js.org/d3-fetch.v2.min.js"></script>
+<script src="https://d3js.org/d3-dsv.v1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-require@1"></script>
+<!-- Load color scale -->
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+
+<script>
+async function remote_fetch(file) {
+    const response = await fetch(await file.url());
+    if (!response.ok) throw new Error(`Unable to load file: ${file.name}`);
+    return response;
+}
+async function dsv(file, delimiter, {array = false, typed = false} = {}) {
+    const [text, d3] = await Promise.all(
+        [file.text(), d3.require("d3-dsv@2.0.0/dist/d3-dsv.min.js")]
+    );
+    return (delimiter === "\t"
+        ? (array ? d3.tsvParseRows : d3.tsvParse)
+        : (array ? d3.csvParseRows : d3.csvParse))(text, typed && d3.autoType);
+}
+class FileAttachment {
+    constructor(url, name) {
+        Object.defineProperties(this, {
+            _url: {value: url},
+            name: {value: name, enumerable: true}
+        });
+    }
+    async url() {
+        return (await this._url) + "";
+    }
+    async text() {
+        return (await remote_fetch(this)).text();
+    }
+}
+
+
+async function bubble() { 
+    //read data
+    async function get_trees() {
+        let csv = await new FileAttachment("tree.csv").text();
+        const data = d3.csvParse(csv, function(d) {
+            return {
+                pid: parseInt(d.pid),
+                hull: parseInt(d.hull),
+                task: d.task,
+                success: parseFloat(d.success),
+                time: parseInt(d.time)
+            };
+        });
+        return data;
+    }
+    const trees = await get_trees();
+    console.log(trees);
+
+    //dimensions and margins
+    const margin = { top: 40, right: 150, bottom: 60, left: 30 },
+          width = 800,
+          height = 800;
+    //append svg object to body of page
+    const svg = d3
+        .select("#vis")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // ---------------------------//
+    //       AXIS  AND SCALE      //
+    // ---------------------------//
+
+    const xMin = d3.min(trees, d => d.hull);
+    const xMax = d3.max(trees, d => d.hull);
+    const yMax = 1.0;
+
+    //x-axis
+    const x = d3
+        .scaleLinear()
+        .domain([xMin-200000, xMax+200000])
+        .range([0, width]);
+
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x).ticks(5).tickSizeOuter(0));
+    
+    svg.append("text")
+        .attr("class", "x label")
+        .attr("text-anchor", "end")
+        .attr("x", width)
+        .attr("y", height - 6)
+        .text("convex hull area");
+
+    //y-axis
+    const y = d3
+        .scaleLinear()
+        .domain([0, yMax])
+        .range([height, 0]);
+
+    svg.append("g").call(d3.axisLeft(y).ticks(10));
+    
+    svg.append("text")
+        .attr("class", "y label")
+        .attr("text-anchor", "end")
+        .attr("y", 6)
+        .attr("dy", ".75em")
+        .attr("transform", "translate(110,0)")
+        .text("success ratio");
+    
+    // Add scale for bubble color
+    var myColor = d3.scaleOrdinal()
+        .domain(["conf", "bio"])
+        .range(d3.schemeSet1);
+
+    // ---------------------------//
+    //         LEGEND             //
+    // ---------------------------//
+
+    var size = 20;
+    var allgroups = ["conf", "bio"];
+    // chart title
+    svg.append("text")
+        .attr("x", 350)
+        .attr("y", function(d,i){ return 10 + i*(size+5)})
+        .text("Task Completion Times (min.)")
+        .attr("font-size", 24)
+        .attr("text-anchor", "middle");
+    //legend bubbles
+    svg.selectAll("myrect")
+        .data(allgroups)
+        .enter()
+        .append("circle")
+            .attr("cx", 600)
+            //100 = first dot appears. 25 = distance between dots
+            .attr("cy", function(d,i){ return 10 + i*(size+5)}) 
+            .attr("r", 7)
+            .style("opacity", "0.25")
+            .style("fill", function(d){ return myColor(d)});
+            //~ .on("mouseover", highlight)
+            //~ .on("mouseleave", noHighlight);
+    //legend labels
+    svg.selectAll("mylabels")
+        .data(allgroups)
+        .enter()
+        .append("text")
+            .attr("x", 600 + size*.8)
+            //offset from legend bubbles
+            .attr("y", function(d,i){ return i * (size + 5) + (size/2)}) 
+            .style("fill", function(d){ return myColor(d)})
+            .text(function(d){ return d+" (tree)"})
+            .attr("text-anchor", "left")
+            .style("alignment-baseline", "middle");
+            //~ .on("mouseover", highlight)
+            //~ .on("mouseleave", noHighlight)
+        
+    //bubbles
+    svg.append("g")
+        .selectAll("bubble")
+        .data(trees)
+        .enter()
+        .append("circle")
+            .attr("class", d => d.task)
+            .attr("cx", d => x(d.hull))
+            .attr("cy", d => y(d.success))
+            .attr("r", d => d.time)
+            .style("fill", d => myColor(d.task))
+            .style("opacity", "0.25")
+            .attr("stroke", "black");
+    
+    console.log("END");
+}
+</script>
+</head>
+
+<body id="vis" onload="bubble()"></body>
+</html>
