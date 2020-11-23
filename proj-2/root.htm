@@ -14,6 +14,23 @@ https://www.d3-graph-gallery.com/graph/bubble_template.html
 <script src="https://cdn.jsdelivr.net/npm/d3-require@1"></script>
 <!-- Load color scale -->
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<!-- legend hover -->
+<script src="https://d3js.org/d3.v4.js"></script>
+<!--
+<script src="https://cdn.jsdelivr.net/npm/d3-selection@2"></script>
+-->
+
+<!-- change stroke color of circle on hover (white -> black) -->
+<style>
+.bubbles {
+  stroke-width: 1px;
+  stroke: black;
+  opacity: .8
+}
+.bubbles:hover {
+  stroke: black;
+}
+</style>
 
 <script>
 async function remote_fetch(file) {
@@ -126,6 +143,16 @@ async function bubble() {
     //         LEGEND             //
     // ---------------------------//
 
+    //on hover
+    var highlight = function(d) {
+        d3.selectAll("."+d).style("opacity", 0.25);
+    }
+
+    //off hover
+    var noHighlight = function(d) {
+        d3.selectAll("."+d).style("opacity", 0.0);
+    }
+    
     var size = 20;
     var allgroups = ["conf", "bio"];
     // chart title
@@ -145,9 +172,9 @@ async function bubble() {
             .attr("cy", function(d,i){ return 10 + i*(size+5)}) 
             .attr("r", 7)
             .style("opacity", "0.25")
-            .style("fill", function(d){ return myColor(d)});
-            //~ .on("mouseover", highlight)
-            //~ .on("mouseleave", noHighlight);
+            .style("fill", function(d){ return myColor(d)})
+            .on("mouseover", highlight)
+            .on("click", noHighlight);
     //legend labels
     svg.selectAll("mylabels")
         .data(allgroups)
@@ -160,9 +187,49 @@ async function bubble() {
             .text(function(d){ return d+" (tree)"})
             .attr("text-anchor", "left")
             .style("alignment-baseline", "middle");
-            //~ .on("mouseover", highlight)
-            //~ .on("mouseleave", noHighlight)
-        
+
+    // ---------------------------//
+    //      TOOLTIP               //
+    // ---------------------------//
+    
+    //tooltip div hidden by default:
+    var tooltip = d3.select("#vis")
+    .append("div")
+      .style("opacity", 0)
+      .attr("class", "tooltip")
+      .style("background-color", "black")
+      .style("border-radius", "5px")
+      .style("padding", "10px")
+      .style("color", "white");
+
+    //functions to show / update (when mouse move but stay on same circle) / hide the tooltip
+    var showTooltip = function(d) {
+        tooltip
+          .transition()
+          .duration(200);
+        tooltip
+            .style("opacity", 1)
+            .html("participant: " + d.pid)
+            .html("participant: " + d.pid + "<br>time: " + d.time + " minutes")
+            .style("left", (d3.mouse(this)[0]+30) + "px")
+            .style("top", (d3.mouse(this)[1]+30) + "px");
+    }
+    var moveTooltip = function(d) {
+        tooltip
+          .style("left", (d3.mouse(this)[0]+30) + "px")
+          .style("top", (d3.mouse(this)[1]+30) + "px");
+    }
+    var hideTooltip = function(d) {
+        tooltip
+          .transition()
+          .duration(200)
+          .style("opacity", 0);
+    }
+
+    // ---------------------------//
+    //       BUBBLES              //
+    // ---------------------------//
+  
     //bubbles
     svg.append("g")
         .selectAll("bubble")
@@ -173,10 +240,14 @@ async function bubble() {
             .attr("cx", d => x(d.hull))
             .attr("cy", d => y(d.success))
             .attr("r", d => d.time)
-            .style("fill", d => myColor(d.task))
+            .attr("stroke", "black")
             .style("opacity", "0.25")
-            .attr("stroke", "black");
-    
+            .style("fill", d => myColor(d.task))
+            .on("mouseover", showTooltip)
+            .on("mousemove", moveTooltip)
+            .on("mouseleave", hideTooltip);
+
+
     console.log("END");
 }
 </script>
